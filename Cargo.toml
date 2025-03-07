@@ -1,7 +1,6 @@
 [package]
 name = "jerasure-sys"
 license = "MIT"
-license-file = "LICENSE"
 description = "FFI bindings to the jerasure and gf-complete library"
 repository = "https://github.com/LokyinZHAO/jerasure-sys"
 readme = "README.md"
