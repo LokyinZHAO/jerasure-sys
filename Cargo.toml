@@ -1,0 +1,9 @@
+[package]
+name = "jerasure-sys"
+version = "0.1.0"
+edition = "2024"
+
+[build-dependencies]
+autotools = "0.2.7"
+pkg-config = "0.3.31"
+bindgen = "0.71.1"
