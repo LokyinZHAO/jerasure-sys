@@ -1,9 +1,17 @@
 [package]
 name = "jerasure-sys"
+license = "MIT"
+license-file = "LICENSE"
+description = "FFI bindings to the jerasure and gf-complete library"
+repository = "https://github.com/LokyinZHAO/jerasure-sys"
+readme = "README.md"
+categories = ["api-bindings"]
+keywords = ["jerasure", "gf-complete", "ffi", "bindings"]
+authors = ["Lokyin ZHAO <lokyinzhao.work@icloud.com>"]
 version = "0.1.0"
 edition = "2024"
+exclude = ["vendor/gf-complete/manual/*", "vendor/jerasure/Manual.pdf"]
 
 [build-dependencies]
 autotools = "0.2.7"
-pkg-config = "0.3.31"
 bindgen = "0.71.1"
