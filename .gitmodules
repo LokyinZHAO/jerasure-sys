@@ -1,0 +1,6 @@
+[submodule "vendor/gf-complete"]
+	path = vendor/gf-complete
+	url = https://github.com/ceph/gf-complete.git
+[submodule "vendor/jerasure"]
+	path = vendor/jerasure
+	url = https://github.com/LokyinZHAO/jerasure.git
