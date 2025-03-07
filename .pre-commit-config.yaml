@@ -1,0 +1,10 @@
+---
+repos:
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.4.1
+    hooks:
+      - id: commitizen
+        additional_dependencies: ["cz-conventional-gitmoji"]
+      - id: commitizen-branch
+        additional_dependencies: ["cz-conventional-gitmoji"]
+        stages: [pre-push]
