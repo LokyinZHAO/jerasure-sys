@@ -4,14 +4,25 @@ use std::{
     process::Command,
 };
 
+const LOCAL_INCLUDE_DIR: &str = "./vendor/local/include";
+const GF_COMPLETE_HEADER_WRAPPER: &str = "./vendor/gf_complete_wrapper.h";
+const JERASURE_HEADER_WRAPPER: &str = "./vendor/jerasure_wrapper.h";
+const GF_MODULE_DIR: &str = "./vendor/gf-complete";
+const JERASURE_MODULE_DIR: &str = "./vendor/jerasure";
+
 fn main() {
-    const LIB_GF_FILE: &str = "gf_complete";
-    const LIB_JR_FILE: &str = "Jerasure";
+    // Set rerun-if-changed
+    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=vendor");
+
+    // Set libraries to link
+    // WARNING: The order of the following lines is important
+    println!("cargo:rustc-link-lib=static=Jerasure");
+    println!("cargo:rustc-link-lib=static=gf_complete");
 
     // Build libraries
     build_gf_complete();
     build_jerasure();
-    // WARNING: The order of the following lines is important
     println!(
         "cargo:rustc-link-search=native={}",
         PathBuf::from(std::env::var_os("OUT_DIR").unwrap())
@@ -20,8 +31,6 @@ fn main() {
             .unwrap()
             .display()
     );
-    println!("cargo:rustc-link-lib=static={}", LIB_JR_FILE);
-    println!("cargo:rustc-link-lib=static={}", LIB_GF_FILE);
 
     // Make bindings
     bindgen_gf_complete();
@@ -31,10 +40,9 @@ fn main() {
 fn build_gf_complete() {
     const _MIN_VERSION: &str = "2.0";
     const LIB_NAME: &str = "gf-complete";
-    const MODULE_DIR: &str = "./vendor/gf-complete";
 
     // Submodule directory containing upstream source files (readonly)
-    let module_dir = std::fs::canonicalize(MODULE_DIR).expect("gf-complete directory not found");
+    let module_dir = std::fs::canonicalize(GF_MODULE_DIR).expect("gf-complete directory not found");
 
     // Copy source files to writable directory in `OUT_DIR`
     let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
@@ -47,7 +55,7 @@ fn build_gf_complete() {
     );
     cp_r(module_dir, src_dir.clone());
 
-    // Run `autorecofig`
+    // Run `autoreconf`
     println!(
         "sh: [autoreconf --force --install -I m4] in {}",
         src_dir.display()
@@ -60,7 +68,7 @@ fn build_gf_complete() {
     println!("autoreconf: {}", String::from_utf8_lossy(&output.stdout));
     eprintln!("autoreconf: {}", String::from_utf8_lossy(&output.stderr));
 
-    // Build using autotools
+    // Build using auto-tools
     println!(
         "sh: [./configure --prefix={}] in {}",
         build_dir.display(),
@@ -76,10 +84,10 @@ fn build_gf_complete() {
 fn build_jerasure() {
     const _MIN_VERSION: &str = "2.0";
     const LIB_NAME: &str = "jerasure";
-    const MODULE_DIR: &str = "./vendor/jerasure";
 
     // Submodule directory containing upstream source files (readonly)
-    let module_dir = std::fs::canonicalize(MODULE_DIR).expect("jerasure src directory not found");
+    let module_dir =
+        std::fs::canonicalize(JERASURE_MODULE_DIR).expect("jerasure src directory not found");
 
     // Copy source files to writable directory in `OUT_DIR`
     let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
@@ -93,7 +101,7 @@ fn build_jerasure() {
     println!("-- Copying jerasure source files to {}", src_dir.display());
     cp_r(module_dir, src_dir.clone());
 
-    // Run `autorecofig`
+    // Run `autoreconf`
     println!(
         "sh: [autoreconf --force --install -I m4] in {}",
         src_dir.display()
@@ -127,33 +135,27 @@ fn build_jerasure() {
 
 fn bindgen_jerasure() {
     let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
-    let include_dir = out_dir.join("include");
-    let binding_dir = out_dir.join("bindings");
-    let sys_header_path = include_dir.canonicalize().unwrap();
-    let header_files = [
-        PathBuf::from(&include_dir).join("jerasure.h"),
-        PathBuf::from(&include_dir).join("galois.h"),
-        PathBuf::from(&include_dir).join("reed_sol.h"),
-        PathBuf::from(&include_dir).join("cauchy.h"),
-        // PathBuf::from(&include_dir).join("liberation.h"),
-    ];
-    let out_file = binding_dir.join("jerasure.rs");
-
-    println!("-- Creating bindings directory {}", binding_dir.display());
-    std::fs::create_dir_all(&binding_dir).expect("fail to create bindings directory");
+    // let include_dir = out_dir.join("include");
+    // let include_dir = PathBuf::from(SYS_INCLUDE_DIR);
+    let binding_out_dir = out_dir.join("bindings");
+    let local_header_path = PathBuf::from(LOCAL_INCLUDE_DIR).canonicalize().unwrap();
+    let header_wrapper = PathBuf::from(JERASURE_HEADER_WRAPPER);
+    let out_file = binding_out_dir.join("jerasure.rs");
 
     println!(
-        "-- Generate bindings: [{}] => {}",
-        header_files
-            .iter()
-            .map(|f| f.display().to_string())
-            .collect::<Vec<String>>()
-            .join(", "),
+        "-- Creating bindings directory {}",
+        binding_out_dir.display()
+    );
+    std::fs::create_dir_all(&binding_out_dir).expect("fail to create bindings directory");
+
+    println!(
+        "-- Generate bindings: {} => {}",
+        header_wrapper.display(),
         out_file.display()
     );
     bindgen::Builder::default()
-        .clang_args(["-isystem", sys_header_path.to_str().unwrap()])
-        .headers(header_files.iter().map(|f| f.to_str().unwrap()))
+        .clang_args(["-isystem", local_header_path.to_str().unwrap()])
+        .header(header_wrapper.to_str().unwrap())
         .impl_debug(true)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .allowlist_item("jerasure_.*")
@@ -170,31 +172,26 @@ fn bindgen_jerasure() {
 
 fn bindgen_gf_complete() {
     let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
-    let include_dir = out_dir.join("include");
-    let binding_dir = out_dir.join("bindings");
-    let sys_header_path = include_dir.canonicalize().unwrap();
-    let header_files = [
-        PathBuf::from(&include_dir).join("gf_complete.h"),
-        PathBuf::from(&include_dir).join("gf_general.h"),
-    ];
-    let out_file = binding_dir.join("gf_complete.rs");
+    let binding_out_dir = out_dir.join("bindings");
+    let local_header_path = PathBuf::from(LOCAL_INCLUDE_DIR).canonicalize().unwrap();
+    let out_file_path = binding_out_dir.join("gf_complete.rs");
+    let header_wrapper_path = PathBuf::from(GF_COMPLETE_HEADER_WRAPPER);
 
-    println!("-- Creating bindings directory {}", binding_dir.display());
-    std::fs::create_dir_all(&binding_dir).expect("fail to create bindings directory");
+    println!(
+        "-- Creating bindings directory {}",
+        binding_out_dir.display()
+    );
+    std::fs::create_dir_all(&binding_out_dir).expect("fail to create bindings directory");
 
     println!(
         "-- Generate bindings: [{}] => {}",
-        header_files
-            .iter()
-            .map(|f| f.display().to_string())
-            .collect::<Vec<String>>()
-            .join(", "),
-        out_file.display()
+        header_wrapper_path.display(),
+        out_file_path.display()
     );
 
     bindgen::Builder::default()
-        .clang_args(["-isystem", sys_header_path.to_str().unwrap()])
-        .headers(header_files.iter().map(|f| f.to_str().unwrap()))
+        .clang_args(["-isystem", local_header_path.to_str().unwrap()])
+        .header(header_wrapper_path.to_str().unwrap())
         .allowlist_item("gf_.*")
         .allowlist_item("GF_.*")
         .impl_debug(true)
@@ -202,7 +199,7 @@ fn bindgen_gf_complete() {
         .generate_comments(true)
         .generate()
         .expect("Unable to generate jerasure bindings")
-        .write_to_file(out_file)
+        .write_to_file(out_file_path)
         .expect("Couldn't write bindings!");
 }
 
