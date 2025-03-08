@@ -54,7 +54,7 @@ fn build_gf_complete() {
     );
     let output = Command::new("autoreconf")
         .current_dir(src_dir.clone())
-        .args(&["--force", "--install", "-I", "m4"])
+        .args(["--force", "--install", "-I", "m4"])
         .output()
         .unwrap();
     println!("autoreconf: {}", String::from_utf8_lossy(&output.stdout));
@@ -100,7 +100,7 @@ fn build_jerasure() {
     );
     let output = Command::new("autoreconf")
         .current_dir(src_dir.clone())
-        .args(&["--force", "--install", "-I", "m4"])
+        .args(["--force", "--install", "-I", "m4"])
         .output()
         .unwrap();
     println!("autoreconf: {}", String::from_utf8_lossy(&output.stdout));
