@@ -5,9 +5,9 @@ repos:
     hooks:
       - id: commitizen
         additional_dependencies: ["cz-conventional-gitmoji"]
-      - id: commitizen-branch
-        additional_dependencies: ["cz-conventional-gitmoji"]
-        stages: [pre-push]
+      # - id: commitizen-branch
+      #   additional_dependencies: ["cz-conventional-gitmoji"]
+      #   stages: [pre-push]
   - repo: https://github.com/doublify/pre-commit-rust
     rev: v1.0
     hooks:
