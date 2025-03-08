@@ -10,8 +10,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  Cargo:
-    name: test, fmt and clippy
+  Ubuntu-Cargo:
+    name: ubuntu-cargo
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
