@@ -1,5 +1,11 @@
 ## v0.2.0 (2025-03-09)
 
+### 🐛🚑️ Fixes
+
+- **Cargo.toml**: fix categories
+
+## v0.2.0 (2025-03-09)
+
 ### ✨ Features
 
 - **cargo/feature**: add bundle feature to enable build deps from source
