@@ -1,3 +1,22 @@
+## v0.2.0 (2025-03-09)
+
+### ✨ Features
+
+- **cargo/feature**: add bundle feature to enable build deps from source
+
+### ✅🤡🧪 Tests
+
+- add some test
+
+### 💚👷 CI & Build
+
+- **workflow/publish_crate**: add workflow to publish crate
+
+### 📝💡 Documentation
+
+- **Cargo.toml**: add package category metadata
+- **README**: add requirements information
+
 ## v0.1.1 (2025-03-09)
 
 ### 🐛🚑️ Fixes
