@@ -1,6 +1,6 @@
 [tool.commitizen]
 name = "cz_gitmoji"
-tag_format = "v$major.$minor"
+tag_format = "v$version"
 version_scheme = "semver"
 version_provider = "cargo"
 update_changelog_on_bump = true

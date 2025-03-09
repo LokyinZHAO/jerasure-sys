@@ -1,4 +1,38 @@
-## v0.1 (2025-03-07)
+## v0.1.1 (2025-03-09)
+
+### 🐛🚑️ Fixes
+
+- **Cargo.toml**: unnecessary license-file
+- **build.rs**: cargo reruns build.rs on every build
+
+### 💚👷 CI & Build
+
+- **workflow/release**: fix release trigger
+- add some CI build system
+
+### 📄 License
+
+- **LICENSE**: add MIT license
+
+### 📌➕⬇️➖⬆️ Dependencies
+
+- include submodules into repo
+
+### 📝💡 Documentation
+
+- **Cargo.toml**: add package metadata before publish
+- **README**: rename README to README.md
+- **README**: add README file
+
+### 🔧🔨📦️ Configuration, Scripts, Packages
+
+- add pre-commit config
+
+### 🚨 Linting
+
+- **build.rs**: fix cargo clippy warning
+
+## v0.1.0 (2025-03-07)
 
 ### ✨ Features
 
