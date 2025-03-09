@@ -14,3 +14,10 @@ exclude = ["vendor/gf-complete/manual/*", "vendor/jerasure/Manual.pdf"]
 [build-dependencies]
 autotools = "0.2.7"
 bindgen = "0.71.1"
+
+[features]
+default = ["bundle"]
+# The bundle feature enables building the dependencies from source. Set by default.
+bundle = ["link_static"]
+# The link_static feature enables linking the dependencies statically.
+link_static = []

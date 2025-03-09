@@ -17,10 +17,85 @@ fn main() {
 
     // Set libraries to link
     // WARNING: The order of the following lines is important
-    println!("cargo:rustc-link-lib=static=Jerasure");
-    println!("cargo:rustc-link-lib=static=gf_complete");
+    if cfg!(feature = "link_static") {
+        println!("-- Linking static libraries");
+        println!("cargo:rustc-link-lib=static=Jerasure");
+        println!("cargo:rustc-link-lib=static=gf_complete");
+    } else {
+        println!("cargo:rustc-link-lib=Jerasure");
+        println!("cargo:rustc-link-lib=gf_complete");
+    }
 
     // Build libraries
+    if cfg!(feature = "bundle") {
+        if !cfg!(feature = "link_static") {
+            println!(
+                "cargo::warning=It is discouraged to link shared libraries when bundling. See more: https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-search"
+            );
+        }
+        build_from_source();
+    } else {
+        // try to link the system libraries
+        bindgen_sys();
+    }
+}
+
+fn bindgen_sys() {
+    let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+    let binding_out_dir = out_dir.join("bindings");
+    let gf_wrapper_file_path = PathBuf::from(GF_COMPLETE_HEADER_WRAPPER);
+    let gf_out_file_path = binding_out_dir.join("gf_complete.rs");
+    let jr_wrapper_file_path = PathBuf::from(JERASURE_HEADER_WRAPPER);
+    let jr_out_file_path = binding_out_dir.join("jerasure.rs");
+
+    println!(
+        "-- Creating bindings directory {}",
+        binding_out_dir.display()
+    );
+    std::fs::create_dir_all(&binding_out_dir).expect("fail to create bindings directory");
+
+    // bindgen for gf-complete
+    println!(
+        "-- Generate bindings: {} => {}",
+        gf_wrapper_file_path.display(),
+        gf_out_file_path.display()
+    );
+
+    bindgen::Builder::default()
+        .header(gf_wrapper_file_path.to_str().unwrap())
+        .allowlist_item("gf_.*")
+        .allowlist_item("GF_.*")
+        .impl_debug(true)
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .generate_comments(true)
+        .generate()
+        .expect("Unable to generate jerasure bindings")
+        .write_to_file(gf_out_file_path)
+        .expect("Couldn't write bindings!");
+
+    // bindgen for jerasure
+    println!(
+        "-- Generate bindings: {} => {}",
+        jr_wrapper_file_path.display(),
+        jr_out_file_path.display()
+    );
+    bindgen::Builder::default()
+        .header(jr_wrapper_file_path.to_str().unwrap())
+        .impl_debug(true)
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .allowlist_item("jerasure_.*")
+        .allowlist_item("galois_.*")
+        .allowlist_item("cauchy_.*")
+        .allowlist_item("reed_sol_.*")
+        // .allowlist_item("liberation_.*")
+        .generate_comments(true)
+        .generate()
+        .expect("Unable to generate jerasure bindings")
+        .write_to_file(jr_out_file_path)
+        .expect("Couldn't write bindings!");
+}
+
+fn build_from_source() {
     build_gf_complete();
     build_jerasure();
     println!(
@@ -31,7 +106,6 @@ fn main() {
             .unwrap()
             .display()
     );
-
     // Make bindings
     bindgen_gf_complete();
     bindgen_jerasure();
@@ -74,7 +148,10 @@ fn build_gf_complete() {
         build_dir.display(),
         src_dir.display()
     );
-    let _install_root_dir = autotools::Config::new(src_dir).build();
+    let _install_root_dir = autotools::Config::new(src_dir)
+        .enable_shared()
+        .enable_static()
+        .build();
 
     // cleanup the build dir
     println!("-- Removing build directory {}", build_dir.display());
@@ -126,7 +203,11 @@ fn build_jerasure() {
         flag,
         src_dir.display()
     );
-    let _install_root_dir = autotools::Config::new(src_dir.clone()).cflag(flag).build();
+    let _install_root_dir = autotools::Config::new(src_dir.clone())
+        .enable_shared()
+        .enable_static()
+        .cflag(flag)
+        .build();
 
     // cleanup the build dir
     println!("-- Removing build directory {}", build_dir.display());
