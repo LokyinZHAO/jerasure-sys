@@ -1,3 +1,9 @@
+## v1.0.0 (2025-03-09)
+
+### 💚👷 CI & Build
+
+- **workflow/release**: add change log as body
+
 ## v0.2.0 (2025-03-09)
 
 ### 🐛🚑️ Fixes
