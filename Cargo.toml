@@ -7,7 +7,7 @@ readme = "README.md"
 categories = ["api-bindings", "external-ffi-bindings"]
 keywords = ["jerasure", "gf-complete", "ffi", "bindings"]
 authors = ["Lokyin ZHAO <lokyinzhao.work@icloud.com>"]
-version = "1.0.1"
+version = "1.0.2"
 edition = "2024"
 exclude = ["vendor/gf-complete/manual/*", "vendor/jerasure/Manual.pdf"]
 
