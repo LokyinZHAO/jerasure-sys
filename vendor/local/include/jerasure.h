@@ -128,6 +128,7 @@ int **jerasure_dumb_bitmatrix_to_schedule(int k, int m, int w, int *bitmatrix);
 int **jerasure_smart_bitmatrix_to_schedule(int k, int m, int w, int *bitmatrix);
 int ***jerasure_generate_schedule_cache(int k, int m, int w, int *bitmatrix, int smart);
 
+void jerasure_free_matrix(int *matrix);
 void jerasure_free_schedule(int **schedule);
 void jerasure_free_schedule_cache(int k, int m, int ***cache);
 
