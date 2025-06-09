@@ -13,7 +13,7 @@ exclude = ["vendor/gf-complete/manual/*", "vendor/jerasure/Manual.pdf"]
 
 [build-dependencies]
 autotools = "0.2.7"
-bindgen = "0.71.1"
+bindgen = "0.72.0"
 
 [features]
 default = ["bundle"]
